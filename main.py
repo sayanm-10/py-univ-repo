@@ -68,7 +68,7 @@ def print_student_summary(students):
     
     pt = PrettyTable(field_names=['CWID', 'Name', 'Completed Courses'])
     for student in students.values():
-        pt.add_row([student.id, student.name, [course for course in student.courses.keys()]])
+        pt.add_row([student.id, student.name, [course for course in sorted(student.courses.keys())]])
 
     print(pt)
 
