@@ -12,4 +12,4 @@ class Student:
         self.id = id
         self.name = name
         self.major = major
-        self.courses = defaultdict(int) # key course, value grade
+        self.courses = defaultdict(str) # key: course, value: letter grade
