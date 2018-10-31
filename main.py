@@ -72,12 +72,24 @@ def print_student_summary(students):
 
     print(pt)
 
+def print_instructor_summary(instructors):
+    ''' use Pretty Table to print a summary of instructors '''
+
+    print('\n\n Instructor Summary')
+
+    pt = PrettyTable(field_names=['CWID', 'Name', 'Dept', 'Course', 'Students'])
+    for instructor in instructors.values():
+        for course, student_count in instructor.courses.items():
+            pt.add_row([instructor.id, instructor.name, instructor.dept, course, student_count])
+
+    print(pt)
+
 def main():
     ''' Entry point of the app '''
     
     repo = create_repo()
     print_student_summary(repo.students)
-    # print_instructor_summary(repo.instructors)
+    print_instructor_summary(repo.instructors)
 
 if __name__ == "__main__":
     ''' This is executed when run from the command line '''
