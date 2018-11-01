@@ -12,6 +12,7 @@ from repository import Repository
 from student import Student
 from instructor import Instructor
 
+# modify this to run unit tests with different directory
 TEST_DIR = os.path.join(os.getcwd(), 'Stevens')
 
 def file_reader(path, field_num, sep, header=False):
@@ -90,7 +91,7 @@ def create_repo(repo_name, directory):
 def print_student_summary(students):
     ''' use Pretty Table to print a summary of the students '''
 
-    print('\n\nStudent Summary\n')
+    print('\n\nStudent Summary')
     
     pt = PrettyTable(field_names=['CWID', 'Name', 'Completed Courses'])
     for student in students.values():
