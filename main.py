@@ -88,29 +88,6 @@ def create_repo(repo_name, directory):
             else:
                 return repo
 
-def print_student_summary(students):
-    ''' use Pretty Table to print a summary of the students '''
-
-    print('\n\nStudent Summary')
-    
-    pt = PrettyTable(field_names=['CWID', 'Name', 'Completed Courses'])
-    for student in students.values():
-        pt.add_row([student.id, student.name, [course for course in sorted(student.courses.keys())]])
-
-    print(pt)
-
-def print_instructor_summary(instructors):
-    ''' use Pretty Table to print a summary of instructors '''
-
-    print('\n\n Instructor Summary')
-
-    pt = PrettyTable(field_names=['CWID', 'Name', 'Dept', 'Course', 'Students'])
-    for instructor in instructors.values():
-        for course, student_count in instructor.courses.items():
-            pt.add_row([instructor.id, instructor.name, instructor.dept, course, student_count])
-
-    print(pt)
-
 def main():
     ''' Entry point of the app '''
     
@@ -119,8 +96,8 @@ def main():
     
     repo = create_repo(repo_name, directory)
     if repo:
-        print_student_summary(repo.students)
-        print_instructor_summary(repo.instructors)
+        repo.print_student_summary()
+        repo.print_instructor_summary()
 
 class RepoTest(unittest.TestCase):
     ''' Unit test the Repo '''
