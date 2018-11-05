@@ -48,3 +48,13 @@ class Repository:
                 pt.add_row([instructor.id, instructor.name, instructor.dept, course, student_count])
 
         print(pt)
+
+    def get_student(self, id):
+        ''' get student object by id '''
+
+        return self.students[id]
+
+    def get_instructor(self, id):
+        ''' get instructor by id '''
+
+        return self.instructors[id]

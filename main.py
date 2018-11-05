@@ -37,19 +37,14 @@ def file_reader(path, field_num, sep, header=False):
                     # return fields from 0:field_num as tuple
                     yield tuple(fields[:field_num])
 
-def create_repo(repo_name, directory):
-    ''' given univ repo name and the directory for all text files 
-        creates a repository of students, instructors and associated grades'''
+def add_students(repo, directory):
+    ''' add students to the repo object '''
 
-    repo = Repository(repo_name)
     students_path = os.path.join(directory, "students.txt")
-    instructors_path = os.path.join(directory, "instructors.txt")
-    grades_path = os.path.join(directory, "grades.txt")
 
     try:
         for student in file_reader(students_path, 3, '\t'):
-            new_student = Student(student[0], student[1], student[2])
-            repo.students[new_student.id] = new_student
+            repo.add_student(Student(student[0], student[1], student[2]))
     except FileNotFoundError:
         print('File not found on', students_path)
     except PermissionError:
@@ -57,36 +52,61 @@ def create_repo(repo_name, directory):
     except ValueError:
         print("Missing field in students.txt")
     else:
-        
-        try:
-            for instructor in file_reader(instructors_path, 3, '\t'):
-                new_instructor = Instructor(instructor[0], instructor[1], instructor[2])
-                repo.instructors[new_instructor.id] = new_instructor
-        except FileNotFoundError:
-            print('File not found on', instructors_path)
-        except PermissionError:
-            print("Permission denied to open file on destination", instructors_path)
-        except ValueError:
-            print("Missing field in instructors.txt")
-        else:
+        return repo
 
-            try:    
-                for grade in file_reader(grades_path, 4, '\t'):
-                    student_id = grade[0]
-                    course = grade[1]
-                    letter_grade = grade[2]
-                    inst_id = grade[3]
-                    
-                    repo.students[student_id].courses[course] = letter_grade
-                    repo.instructors[inst_id].courses[course] += 1
-            except FileNotFoundError:
-                print('File not found on', grades_path)
-            except PermissionError:
-                print("Permission denied to open file on destination", grades_path)
-            except ValueError:
-                print("Missing field in grades.txt")
-            else:
-                return repo
+def add_instructors(repo, directory):
+    ''' add instructors to the repo object '''
+
+    instructors_path = os.path.join(directory, "instructors.txt")
+
+    try:
+        for instructor in file_reader(instructors_path, 3, '\t'):
+            repo.add_instructor(Instructor(instructor[0], instructor[1], instructor[2]))
+    except FileNotFoundError:
+        print('File not found on', instructors_path)
+    except PermissionError:
+        print("Permission denied to open file on destination", instructors_path)
+    except ValueError:
+        print("Missing field in instructors.txt")
+    else:
+        return repo
+
+def add_grades(repo, directory):
+    ''' add course/grades to the relevant student and instructor '''
+    
+    grades_path = os.path.join(directory, "grades.txt")
+
+    try:    
+        for grade in file_reader(grades_path, 4, '\t'):
+            student_id = grade[0]
+            course = grade[1]
+            letter_grade = grade[2]
+            inst_id = grade[3]
+
+            # assign grade to the student for particular course            
+            repo.get_student(student_id).courses[course] = letter_grade
+            # increment the student count for that course by 1
+            repo.get_instructor(inst_id).courses[course] += 1
+    except FileNotFoundError:
+        print('File not found on', grades_path)
+    except PermissionError:
+        print("Permission denied to open file on destination", grades_path)
+    except ValueError:
+        print("Missing field in grades.txt")
+    else:
+        return repo
+
+def create_repo(repo_name, directory):
+    ''' given univ repo name and the directory for all text files 
+        creates a repository of students, instructors and associated grades'''
+
+    repo = Repository(repo_name)
+
+    repo = add_students(repo, directory)
+    repo = add_instructors(repo, directory)
+    repo = add_grades(repo, directory)
+
+    return repo
 
 def main():
     ''' Entry point of the app '''
