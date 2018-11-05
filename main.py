@@ -84,9 +84,9 @@ def add_grades(repo, directory):
             inst_id = grade[3]
 
             # assign grade to the student for particular course            
-            repo.get_student(student_id).courses[course] = letter_grade
+            repo.get_student(student_id).assign_grade(course, letter_grade)
             # increment the student count for that course by 1
-            repo.get_instructor(inst_id).courses[course] += 1
+            repo.get_instructor(inst_id).increment_student_count(course)
     except FileNotFoundError:
         print('File not found on', grades_path)
     except PermissionError:

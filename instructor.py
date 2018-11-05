@@ -13,3 +13,8 @@ class Instructor:
         self.dept = dept
         self.courses = defaultdict(int) # key course, value number of students
 
+    def increment_student_count(self, course):
+        ''' increment the student count for the course by 1 '''
+
+        self.courses[course] += 1
+
