@@ -164,10 +164,20 @@ class RepoTest(unittest.TestCase):
         self.assertEqual(student.name, 'Wyatt, X')
         self.assertEqual(sorted(student.courses.keys()), ['CS 545', 'SSW 564', 'SSW 567', 'SSW 687'])
 
+    def test_majors(self):
+        ''' test the majors in the repo '''
+
+        repo = RepoTest.test_repo
+        major = repo.majors['SYEN'] # {'R' : ['SYS 612', 'SYS 671', 'SYS 800'], 'E' : ['SSW 540', 'SSW 565', 'SSW 810']}
+
+        self.assertEqual(sorted(major['R']), ['SYS 612', 'SYS 671', 'SYS 800'])
+        self.assertEqual(sorted(major['E']), ['SSW 540', 'SSW 565', 'SSW 810'])
+
+
 if __name__ == "__main__":
     ''' This is executed when run from the command line '''
 
     main()
     
-    # print('\n\n**************** Unit Tests *********************')
-    # unittest.main(exit=False, verbosity=2)
+    print('\n\n**************** Unit Tests *********************')
+    unittest.main(exit=False, verbosity=2)
