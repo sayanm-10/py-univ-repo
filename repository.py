@@ -4,9 +4,10 @@ class Repository:
     ''' class Repository to hold the students, instructors and grades.  
         This class is just a container to store all of the data structures together in a single place. '''
 
-    student_fields = ['CWID', 'Name', 'Completed Courses']
+    student_fields = ['CWID', 'Name', 'Major', 'Completed Courses', 'Remaining Required']
     instructor_fields = ['CWID', 'Name', 'Dept', 'Course', 'Students']
     major_fields = ['Dept', 'Required', 'Electives']
+    pass_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C']
     
     def __init__(self, univ):
         ''' constructor to initialize repository object '''
@@ -49,7 +50,14 @@ class Repository:
         pt = PrettyTable(field_names=Repository.student_fields)
 
         for student in self.students.values():
-            pt.add_row([student.id, student.name, [course for course in sorted(student.courses.keys())]])
+            pt.add_row([
+                student.id,
+                student.name,
+                student.major,
+                [course for course in sorted(student.courses.keys()) if student.courses[course] in Repository.pass_grades],
+                set(self.majors[student.major]['R']).difference(set([course for course in sorted(student.courses.keys()) \
+                    if student.courses[course] in Repository.pass_grades]))
+            ])
 
         print(pt)
 
