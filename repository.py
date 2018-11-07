@@ -4,7 +4,7 @@ class Repository:
     ''' class Repository to hold the students, instructors and grades.  
         This class is just a container to store all of the data structures together in a single place. '''
 
-    student_fields = ['CWID', 'Name', 'Major', 'Completed Courses', 'Remaining Required']
+    student_fields = ['CWID', 'Name', 'Major', 'Completed Courses', 'Remaining Required', 'Remaining Electives']
     instructor_fields = ['CWID', 'Name', 'Dept', 'Course', 'Students']
     major_fields = ['Dept', 'Required', 'Electives']
     pass_grades = ['A', 'A-', 'B+', 'B', 'B-', 'C+', 'C']
@@ -56,7 +56,9 @@ class Repository:
                 student.major,
                 [course for course in sorted(student.courses.keys()) if student.courses[course] in Repository.pass_grades],
                 set(self.majors[student.major]['R']).difference(set([course for course in sorted(student.courses.keys()) \
-                    if student.courses[course] in Repository.pass_grades]))
+                    if student.courses[course] in Repository.pass_grades])),
+                None if set(self.majors[student.major]['E']) & set([course for course in sorted(student.courses.keys()) \
+                    if student.courses[course] in Repository.pass_grades]) else self.majors[student.major]['E']
             ])
 
         print(pt)
