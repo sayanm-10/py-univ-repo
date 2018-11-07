@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "Sayan Mukherjee"
-__version__ = "0.1.0"
+__version__ = "0.2.1"
 __license__ = "MIT"
 
 import os
@@ -11,6 +11,7 @@ from prettytable import PrettyTable
 from repository import Repository
 from student import Student
 from instructor import Instructor
+from major import Major
 
 # modify this to run unit tests with different directory
 TEST_DIR = os.path.join(os.getcwd(), 'Stevens')
@@ -37,19 +38,14 @@ def file_reader(path, field_num, sep, header=False):
                     # return fields from 0:field_num as tuple
                     yield tuple(fields[:field_num])
 
-def create_repo(repo_name, directory):
-    ''' given univ repo name and the directory for all text files 
-        creates a repository of students, instructors and associated grades'''
+def add_students(repo, directory):
+    ''' add students to the repo object '''
 
-    repo = Repository(repo_name)
     students_path = os.path.join(directory, "students.txt")
-    instructors_path = os.path.join(directory, "instructors.txt")
-    grades_path = os.path.join(directory, "grades.txt")
 
     try:
         for student in file_reader(students_path, 3, '\t'):
-            new_student = Student(student[0], student[1], student[2])
-            repo.students[new_student.id] = new_student
+            repo.add_student(Student(student[0], student[1], student[2]))
     except FileNotFoundError:
         print('File not found on', students_path)
     except PermissionError:
@@ -57,59 +53,79 @@ def create_repo(repo_name, directory):
     except ValueError:
         print("Missing field in students.txt")
     else:
-        
-        try:
-            for instructor in file_reader(instructors_path, 3, '\t'):
-                new_instructor = Instructor(instructor[0], instructor[1], instructor[2])
-                repo.instructors[new_instructor.id] = new_instructor
-        except FileNotFoundError:
-            print('File not found on', instructors_path)
-        except PermissionError:
-            print("Permission denied to open file on destination", instructors_path)
-        except ValueError:
-            print("Missing field in instructors.txt")
-        else:
+        return repo
 
-            try:    
-                for grade in file_reader(grades_path, 4, '\t'):
-                    student_id = grade[0]
-                    course = grade[1]
-                    letter_grade = grade[2]
-                    inst_id = grade[3]
-                    
-                    repo.students[student_id].courses[course] = letter_grade
-                    repo.instructors[inst_id].courses[course] += 1
-            except FileNotFoundError:
-                print('File not found on', grades_path)
-            except PermissionError:
-                print("Permission denied to open file on destination", grades_path)
-            except ValueError:
-                print("Missing field in grades.txt")
-            else:
-                return repo
+def add_instructors(repo, directory):
+    ''' add instructors to the repo object '''
 
-def print_student_summary(students):
-    ''' use Pretty Table to print a summary of the students '''
+    instructors_path = os.path.join(directory, "instructors.txt")
 
-    print('\n\nStudent Summary')
+    try:
+        for instructor in file_reader(instructors_path, 3, '\t'):
+            repo.add_instructor(Instructor(instructor[0], instructor[1], instructor[2]))
+    except FileNotFoundError:
+        print('File not found on', instructors_path)
+    except PermissionError:
+        print("Permission denied to open file on destination", instructors_path)
+    except ValueError:
+        print("Missing field in instructors.txt")
+    else:
+        return repo
+
+def add_grades(repo, directory):
+    ''' add course/grades to the relevant student and instructor '''
     
-    pt = PrettyTable(field_names=['CWID', 'Name', 'Completed Courses'])
-    for student in students.values():
-        pt.add_row([student.id, student.name, [course for course in sorted(student.courses.keys())]])
+    grades_path = os.path.join(directory, "grades.txt")
 
-    print(pt)
+    try:    
+        for grade in file_reader(grades_path, 4, '\t'):
+            student_id = grade[0]
+            course = grade[1]
+            letter_grade = grade[2]
+            inst_id = grade[3]
 
-def print_instructor_summary(instructors):
-    ''' use Pretty Table to print a summary of instructors '''
+            # assign grade to the student for particular course            
+            repo.get_student(student_id).assign_grade(course, letter_grade)
+            # increment the student count for that course by 1
+            repo.get_instructor(inst_id).increment_student_count(course)
+    except FileNotFoundError:
+        print('File not found on', grades_path)
+    except PermissionError:
+        print("Permission denied to open file on destination", grades_path)
+    except ValueError:
+        print("Missing field in grades.txt")
+    else:
+        return repo
 
-    print('\n\n Instructor Summary')
+def add_majors(repo, directory):
+    ''' add majors to the repo '''
 
-    pt = PrettyTable(field_names=['CWID', 'Name', 'Dept', 'Course', 'Students'])
-    for instructor in instructors.values():
-        for course, student_count in instructor.courses.items():
-            pt.add_row([instructor.id, instructor.name, instructor.dept, course, student_count])
+    majors_path = os.path.join(directory, "majors.txt")
 
-    print(pt)
+    try:
+        for major in file_reader(majors_path, 3, '\t'):
+            repo.add_major(Major(major[0], major[1], major[2]))
+    except FileNotFoundError:
+        print('File not found on', majors_path)
+    except PermissionError:
+        print("Permission denied to open file on destination", majors_path)
+    except ValueError:
+        print("Missing field in grades.txt")
+    else:
+        return repo
+
+def create_repo(repo_name, directory):
+    ''' given univ repo name and the directory for all text files 
+        creates a repository of students, instructors and associated grades'''
+
+    repo = Repository(repo_name)
+
+    repo = add_students(repo, directory)
+    repo = add_instructors(repo, directory)
+    repo = add_grades(repo, directory)
+    repo = add_majors(repo, directory)
+
+    return repo
 
 def main():
     ''' Entry point of the app '''
@@ -119,8 +135,9 @@ def main():
     
     repo = create_repo(repo_name, directory)
     if repo:
-        print_student_summary(repo.students)
-        print_instructor_summary(repo.instructors)
+        repo.print_student_summary()
+        repo.print_instructor_summary()
+        repo.print_major_summary()
 
 class RepoTest(unittest.TestCase):
     ''' Unit test the Repo '''
@@ -146,6 +163,16 @@ class RepoTest(unittest.TestCase):
 
         self.assertEqual(student.name, 'Wyatt, X')
         self.assertEqual(sorted(student.courses.keys()), ['CS 545', 'SSW 564', 'SSW 567', 'SSW 687'])
+
+    def test_majors(self):
+        ''' test the majors in the repo '''
+
+        repo = RepoTest.test_repo
+        major = repo.majors['SYEN'] # {'R' : ['SYS 612', 'SYS 671', 'SYS 800'], 'E' : ['SSW 540', 'SSW 565', 'SSW 810']}
+
+        self.assertEqual(sorted(major['R']), ['SYS 612', 'SYS 671', 'SYS 800'])
+        self.assertEqual(sorted(major['E']), ['SSW 540', 'SSW 565', 'SSW 810'])
+
 
 if __name__ == "__main__":
     ''' This is executed when run from the command line '''

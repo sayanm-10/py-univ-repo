@@ -13,3 +13,8 @@ class Student:
         self.name = name
         self.major = major
         self.courses = defaultdict(str) # key: course, value: letter grade
+
+    def assign_grade(self, course, grade):
+        ''' assign grade to a course '''
+
+        self.courses[course] = grade
