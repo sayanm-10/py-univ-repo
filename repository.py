@@ -56,8 +56,8 @@ class Repository:
                 student.major,
                 [course for course in sorted(student.courses.keys()) if student.courses[course] in Repository.pass_grades],
                 set(self.majors[student.major]['R']).difference(set([course for course in sorted(student.courses.keys()) \
-                    if student.courses[course] in Repository.pass_grades])),
-                None if set(self.majors[student.major]['E']) & set([course for course in sorted(student.courses.keys()) \
+                    if student.courses[course] in Repository.pass_grades])) if student.major in self.majors else None,
+                None if student.major not in self.majors or set(self.majors[student.major]['E']) & set([course for course in sorted(student.courses.keys()) \
                     if student.courses[course] in Repository.pass_grades]) else self.majors[student.major]['E']
             ])
 
