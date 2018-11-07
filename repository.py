@@ -6,6 +6,7 @@ class Repository:
 
     student_fields = ['CWID', 'Name', 'Completed Courses']
     instructor_fields = ['CWID', 'Name', 'Dept', 'Course', 'Students']
+    major_fields = ['Dept', 'Required', 'Electives']
     
     def __init__(self, univ):
         ''' constructor to initialize repository object '''
@@ -13,6 +14,7 @@ class Repository:
         self.univ = univ
         self.students = dict() # key:id, value: student obj
         self.instructors = dict() # key:id, value: instructor obj
+        self.majors = dict() # key: dept, value: dict(flag, [courses])
 
     def add_student(self, student):
         ''' add a student object to the repo dict of students '''
@@ -23,6 +25,21 @@ class Repository:
         ''' add an instructor to the repo dict of instructors '''
 
         self.instructors[instructor.id] = instructor
+
+    def add_major(self, major):
+        ''' add a major to the repo dict of majors '''
+
+        # if dept exists in majors dict
+        if major.dept in self.majors:
+            # if current flag exists as a key for the values of the dept
+            if major.flag in self.majors[major.dept]:
+                self.majors[major.dept][major.flag].append(major.course)
+            else:
+                self.majors[major.dept][major.flag] = [major.course]
+        else:
+            self.majors[major.dept] = dict()
+            self.majors[major.dept][major.flag] = [major.course]
+
 
     def print_student_summary(self):
         ''' use Pretty Table to print a summary of the students '''
@@ -48,6 +65,22 @@ class Repository:
                 pt.add_row([instructor.id, instructor.name, instructor.dept, course, student_count])
 
         print(pt)
+
+    def print_major_summary(self):
+        ''' use Pretty Table to print a summary of majors '''
+
+        print('\n\n Majors Summary')
+
+        pt = PrettyTable(field_names=Repository.major_fields)
+
+        for dept, major in self.majors.items():
+            pt.add_row([
+                dept,
+                [sorted(course) for flag, course in major.items() if flag.lower() == 'r'][0],
+                [sorted(course) for flag, course in major.items() if flag.lower() == 'e'][0]
+            ])
+
+        print (pt)
 
     def get_student(self, id):
         ''' get student object by id '''

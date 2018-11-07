@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 __author__ = "Sayan Mukherjee"
-__version__ = "0.1.0"
+__version__ = "0.2.1"
 __license__ = "MIT"
 
 import os
@@ -11,6 +11,7 @@ from prettytable import PrettyTable
 from repository import Repository
 from student import Student
 from instructor import Instructor
+from major import Major
 
 # modify this to run unit tests with different directory
 TEST_DIR = os.path.join(os.getcwd(), 'Stevens')
@@ -96,6 +97,23 @@ def add_grades(repo, directory):
     else:
         return repo
 
+def add_majors(repo, directory):
+    ''' add majors to the repo '''
+
+    majors_path = os.path.join(directory, "majors.txt")
+
+    try:
+        for major in file_reader(majors_path, 3, '\t'):
+            repo.add_major(Major(major[0], major[1], major[2]))
+    except FileNotFoundError:
+        print('File not found on', majors_path)
+    except PermissionError:
+        print("Permission denied to open file on destination", majors_path)
+    except ValueError:
+        print("Missing field in grades.txt")
+    else:
+        return repo
+
 def create_repo(repo_name, directory):
     ''' given univ repo name and the directory for all text files 
         creates a repository of students, instructors and associated grades'''
@@ -105,6 +123,7 @@ def create_repo(repo_name, directory):
     repo = add_students(repo, directory)
     repo = add_instructors(repo, directory)
     repo = add_grades(repo, directory)
+    repo = add_majors(repo, directory)
 
     return repo
 
@@ -118,6 +137,7 @@ def main():
     if repo:
         repo.print_student_summary()
         repo.print_instructor_summary()
+        repo.print_major_summary()
 
 class RepoTest(unittest.TestCase):
     ''' Unit test the Repo '''
@@ -149,5 +169,5 @@ if __name__ == "__main__":
 
     main()
     
-    print('\n\n**************** Unit Tests *********************')
-    unittest.main(exit=False, verbosity=2)
+    # print('\n\n**************** Unit Tests *********************')
+    # unittest.main(exit=False, verbosity=2)
