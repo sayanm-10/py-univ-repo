@@ -7,6 +7,7 @@ __license__ = "MIT"
 
 import os
 import unittest
+import sqlite3
 from prettytable import PrettyTable
 from repository import Repository
 from student import Student
@@ -15,6 +16,8 @@ from major import Major
 
 # modify this to run unit tests with different directory
 TEST_DIR = os.path.join(os.getcwd(), 'Stevens')
+# modify this to work with a different db file
+DB_FILE = os.path.join(os.getcwd(), 'DB', 'ssw810_university.db')
 
 def file_reader(path, field_num, sep, header=False):
     ''' a generator function to read text files and return all of the values on a single line on each call to next() '''
@@ -127,8 +130,30 @@ def create_repo(repo_name, directory):
 
     return repo
 
+def print_instructor_summary_db():
+    ''' use pretty table to create an instructor summary table
+        from the specified database file '''
+
+    db = sqlite3.connect(DB_FILE)
+    query = """ select CWID, Name, Dept, Course, count(*) as Student_Count
+                from Instructors I
+                join Grades G
+                on I.CWID = G.Instructor_CWID
+                group by Dept, Course
+                order by Student_Count desc """
+
+    print('\n\n Instructor Summary from DB')
+    pt = PrettyTable(field_names=['CWID', 'Name', 'Dept', 'Course', 'Students'])
+
+    for row in db.execute(query):
+        pt.add_row(row)
+
+    print(pt)
+
 def main():
     ''' Entry point of the app '''
+
+    print_instructor_summary_db()
     
     repo_name = input("\nEnter university name for repo: ")
     directory = input("\nEnter full directory path for repo: ")
