@@ -11,6 +11,8 @@ def instructor_courses():
     ''' display a summary of each Instructor with her/his 
         CWID, Name, Department, Course, and the number of students in the course '''
 
-    return "yeah baby!"
+    return render_template('instructor.html',
+                            title="University Repo",
+                            inst_header=" Number of students by course and instructor")
     
 app.run(debug=True)
